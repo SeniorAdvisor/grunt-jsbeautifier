@@ -131,6 +131,10 @@ module.exports = function(grunt) {
                 return [cssbeautifier, config.css];
             case '.html':
                 return [htmlbeautifier, config.html];
+            // some files can proxy
+            case '.erb':
+                var subFile = file.substring(0, file.length - ext.length);
+                return getBeautifierSetup(subFile, config);
             default:
                 grunt.fail.warn('Cannot beautify ' + file.cyan + ' (only .js, .css and .html are beautifiable)');
                 return null;
