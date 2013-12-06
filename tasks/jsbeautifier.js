@@ -111,7 +111,7 @@ module.exports = function(grunt) {
         grunt.verbose.write('Beautifing ' + file.cyan + '...');
         var result = beautifier(original, config);
         // jsbeautifier would skip the line terminator for js files
-        if (['.js', '.json'].indexOf(path.extname(file)) !== -1) {
+        if (['.js', '.json'].indexOf(getFileExt(file)) !== -1) {
             result += '\n';
         }
         grunt.verbose.ok();
@@ -122,7 +122,7 @@ module.exports = function(grunt) {
     }
 
     function getBeautifierSetup(file, config) {
-        var ext = path.extname(file);
+        var ext = getFileExt(file);
         switch (ext) {
             case '.js':
             case '.json':
@@ -131,13 +131,22 @@ module.exports = function(grunt) {
                 return [cssbeautifier, config.css];
             case '.html':
                 return [htmlbeautifier, config.html];
-            // some files can proxy
-            case '.erb':
-                var subFile = file.substring(0, file.length - ext.length);
-                return getBeautifierSetup(subFile, config);
             default:
                 grunt.fail.warn('Cannot beautify ' + file.cyan + ' (only .js, .css and .html are beautifiable)');
                 return null;
         }
+    }
+
+    /**
+     * Some files can proxy - e.g. foo.js.erb is a js file
+     * @param  {string} file
+     * @return {string} file extension
+     */
+    function getFileExt(file){
+        var fileext = path.extname(file);
+        while (['.erb'].indexOf(fileext) !== -1){
+            fileext = path.extname(file.substring(0, file.length - fileext.length));
+        }
+        return fileext;
     }
 };
